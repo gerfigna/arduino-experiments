@@ -36,11 +36,8 @@ void setup() {
 void loop() {
 
   if ( digitalRead(buttonPin) == HIGH) {
-
-
-
+    
     /****************** Ping Out Role ***************************/
-
     radio.stopListening();                                    // First, stop listening so we can talk.
 
 
