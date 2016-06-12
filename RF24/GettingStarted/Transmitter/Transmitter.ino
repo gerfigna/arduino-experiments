@@ -13,11 +13,18 @@ RF24 radio(7, 8);
 byte addresses[][6] = {"1Node", "2Node"};
 
 const int buttonPin = 2;     // the number of the pushbutton pin
+const int stripePin = 10;
+const int sensorPin = A0;
+
 int buttonState = 0;         // variable for reading the pushbutton status
 int lastButtonState = 0;
-int sensorPin = A0;
+
+
 int sensorValue = 0;
 int treshold = 400;
+
+int ledValue = 0;
+int ledStep = 10;
 
 void setup() {
   Serial.begin(115200);
@@ -35,9 +42,18 @@ void setup() {
 
   pinMode(buttonPin, INPUT);
 
+
 }
 
 void loop() {
+
+  analogWrite(stripePin, ledValue);
+  if((ledValue - ledStep) > 0){
+    ledValue = ledValue - ledStep;
+  }
+  else{
+    ledValue = 0;
+  }
 
   buttonState = digitalRead(buttonPin);
   sensorValue = analogRead(sensorPin);
@@ -45,6 +61,8 @@ void loop() {
   if ( buttonState == HIGH | sensorValue > treshold) {
     if (lastButtonState == LOW) {
 
+      ledValue = 255;
+      
       /****************** Ping Out Role ***************************/
       radio.stopListening();                                    // First, stop listening so we can talk.
 
@@ -57,6 +75,8 @@ void loop() {
 
       unsigned long started_waiting_at = micros();               // Set up a timeout period, get the current microseconds
       boolean timeout = false;                                   // Set up a variable to indicate if a response was received or not
+
+      
 
       while ( ! radio.available() ) {                            // While nothing is received
         if (micros() - started_waiting_at > 200000 ) {           // If waited longer than 200ms, indicate timeout and exit while loop
@@ -82,6 +102,7 @@ void loop() {
         Serial.println(F(" microseconds"));
       }
     }
+    
     lastButtonState = HIGH;
   }
   else {
