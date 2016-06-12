@@ -1,4 +1,3 @@
-﻿
 /*
 * Getting Started example sketch for nRF24L01+ radios
 * This is a very basic example of how to send data from one node to another
@@ -13,6 +12,8 @@ RF24 radio(7,8);
 /**********************************************************/
 
 byte addresses[][6] = {"1Node","2Node"};
+unsigned long started_time;
+const int pinLed = 2;
 
 void setup() {
   Serial.begin(115200);
@@ -28,10 +29,18 @@ void setup() {
   
   // Start the radio listening for data
   radio.startListening();
+
+  pinMode(pinLed, OUTPUT);
+  digitalWrite(pinLed, HIGH);
+  
+  started_time = 0;
 }
 
 void loop() {
-  
+
+      if((micros() - started_time) > 100000){
+        digitalWrite(pinLed, HIGH);
+      }
   
 /****************** Ping Out Role ***************************/  
     unsigned long got_time;
@@ -41,7 +50,10 @@ void loop() {
       while (radio.available()) {                                   // While there is data ready
         radio.read( &got_time, sizeof(unsigned long) );             // Get the payload
       }
-     
+
+      started_time = micros();
+      digitalWrite(pinLed, LOW);
+      
       radio.stopListening();                                        // First, stop listening so we can talk   
       radio.write( &got_time, sizeof(unsigned long) );              // Send the final one back.      
       radio.startListening();                                       // Now, resume listening so we catch the next packets.     
